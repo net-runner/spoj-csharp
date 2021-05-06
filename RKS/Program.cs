@@ -20,15 +20,15 @@ namespace RKS
         static void Main(string[] args)
         {
             int[] parameters = Array.ConvertAll<string, int>(Console.ReadLine().Split(" "), int.Parse);
-            List<Amogus> a = new List<Amogus>();
+            Amogus[] a = new Amogus[parameters[0]];
             int[] numbers = Array.ConvertAll<string, int>(Console.ReadLine().Split(" "), int.Parse);
             for (var i = 0; i < parameters[0]; i++)
             {
-                int indexorum = a.FindIndex(e => e.key == numbers[i]);
+                int indexorum = Array.FindIndex(a, e => e.key == numbers[i]);
                 if (indexorum >= 0) a[indexorum].ammount++;
-                else a.Add(new Amogus(numbers[i], i));
+                else a[i] = new Amogus(numbers[i], i);
             }
-            a.Sort((x, y) =>
+            Array.Sort(a, (x, y) =>
             {
                 int comp = y.ammount.CompareTo(x.ammount);
                 if (comp != 0) return comp;
