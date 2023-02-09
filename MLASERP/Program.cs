@@ -192,7 +192,6 @@ namespace MLASERP
                     var tile = walkableTiles[i];
                     if (!visitedTiles.Contains(tile.getID()))
                     {
-
                         queue.Enqueue(tile, tile.mirror_count);
                     };
 
