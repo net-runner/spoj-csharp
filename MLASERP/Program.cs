@@ -22,7 +22,7 @@ namespace MLASERP
 
             public int cost_distance => this.cost + this.distance;
 
-            public PlotTile Parent { get; set; }
+            public PlotTile? Parent { get; set; }
 
             public void SetDistance(int targetX, int targetY)
             {
@@ -61,6 +61,8 @@ namespace MLASERP
             int incY = currentTile.Y + 1;
             int decX = currentTile.X - 1;
             int decY = currentTile.Y - 1;
+
+
             if (incX < maxX)
             {
                 Direction direction = Direction.E;
@@ -84,10 +86,26 @@ namespace MLASERP
             return possibleTiles;
         }
 
+        static void PrintPath(PlotTile endTile)
+        {
+            Console.WriteLine("Pos: X: " + endTile.X + ", Y: " + endTile.Y + " MI: " + endTile.mirror_count);
+            if (endTile.Parent != null)
+            {
+                PrintPath(endTile.Parent);
+            }
+
+        }
+
         static void Main(string[] args)
         {
             //God i love COWS with LAZERS
-            string[] par = Console.ReadLine().Split(" ");
+            var paramLine = Console.ReadLine();
+
+            if (paramLine == null)
+            {
+                return;
+            }
+            string[] par = paramLine.Split(" ");
 
             //Get the pasture dimensions
             int w = int.Parse(par[0]);
@@ -111,73 +129,74 @@ namespace MLASERP
             //Get the plot
             for (int i = 0; i < h; i++)
             {
-                string plotline = Console.ReadLine();
+                var plotline = Console.ReadLine();
+                if (plotline == null)
+                {
+                    return;
+                }
                 plot[i] = plotline;
 
                 //Find and set cow positions
-                int index = plotline.IndexOf("C");
-                if (index != -1)
+                for (int j = 0; j < plotline.Length; j++)
                 {
-                    if (flag == 0)
+                    char ch = plotline[j];
+                    if (ch == 'C')
                     {
-                        start.X = index;
-                        start.Y = i;
-                        flag++;
-                    }
-                    else
-                    {
-                        end.X = index;
-                        end.Y = i;
+                        if (flag == 0)
+                        {
+                            start.X = j;
+                            start.Y = i;
+                            flag++;
+                        }
+                        else
+                        {
+                            end.X = j;
+                            end.Y = i;
+                        }
                     }
                 }
             }
             start.SetDistance(end.X, end.Y);
-            start.Parent = start;
+
 
             List<PlotTile> activeTiles = new List<PlotTile>();
+            PriorityQueue<PlotTile, int> queue = new PriorityQueue<PlotTile, int>();
             HashSet<string> visitedTiles = new HashSet<string>();
 
-            activeTiles.Add(start);
+            queue.Enqueue(start, start.mirror_count);
 
-
-            while (activeTiles.Count > 0)
+            while (queue.Count > 0)
             {
-                var currentTile = activeTiles.OrderBy(x => x.cost_distance).First();
+                var currentTile = queue.Dequeue();
+
 
                 if (currentTile.X == end.X && currentTile.Y == end.Y)
                 {
                     Console.WriteLine(currentTile.mirror_count);
+                    // PrintPath(currentTile);
                     return;
                 }
 
-                visitedTiles.Add(currentTile.getID());
-                activeTiles.Remove(currentTile);
+                if (visitedTiles.Contains(currentTile.getID()))
+                    continue;
+                else
+                    visitedTiles.Add(currentTile.getID());
+
+
 
                 var walkableTiles = GetWalkableTiles(plot, w, h, currentTile, end);
 
-                for (int i = 0; i < walkableTiles.Count; i++)
+                for (int i = 0; i < walkableTiles.Count(); i++)
                 {
 
                     var tile = walkableTiles[i];
+                    if (!visitedTiles.Contains(tile.getID()))
+                    {
 
-                    if (visitedTiles.Contains(tile.getID()))
-                    {
-                        continue;
-                    }
+                        queue.Enqueue(tile, tile.mirror_count);
+                    };
 
-                    var tileIndex = activeTiles.IndexOf(tile);
-                    if (tileIndex != -1)
-                    {
-                        if (tile.cost_distance < activeTiles[tileIndex].cost_distance)
-                        {
-                            activeTiles.RemoveAt(tileIndex);
-                            activeTiles.Add(tile);
-                        }
-                    }
-                    else
-                    {
-                        activeTiles.Add(tile);
-                    }
+
                 }
             }
         }
