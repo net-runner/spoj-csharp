@@ -95,67 +95,8 @@ namespace MLASERP
             }
 
         }
-
-        static void Main(string[] args)
+        static PlotTile? performPathTrace(PlotTile start, PlotTile end, string[] plot, int w, int h)
         {
-            //God i love COWS with LAZERS
-            var paramLine = Console.ReadLine();
-
-            if (paramLine == null)
-            {
-                return;
-            }
-            string[] par = paramLine.Split(" ");
-
-            //Get the pasture dimensions
-            int w = int.Parse(par[0]);
-            int h = int.Parse(par[1]);
-
-            if (w == 0 || h == 0)
-            {
-                return;
-            }
-            if (w > 100 || h > 100)
-            {
-                return;
-            }
-
-            string[] plot = new string[h];
-
-            int flag = 0;
-            PlotTile start = new PlotTile();
-            PlotTile end = new PlotTile();
-
-            //Get the plot
-            for (int i = 0; i < h; i++)
-            {
-                var plotline = Console.ReadLine();
-                if (plotline == null)
-                {
-                    return;
-                }
-                plot[i] = plotline;
-
-                //Find and set cow positions
-                for (int j = 0; j < plotline.Length; j++)
-                {
-                    char ch = plotline[j];
-                    if (ch == 'C')
-                    {
-                        if (flag == 0)
-                        {
-                            start.X = j;
-                            start.Y = i;
-                            flag++;
-                        }
-                        else
-                        {
-                            end.X = j;
-                            end.Y = i;
-                        }
-                    }
-                }
-            }
             start.SetDistance(end.X, end.Y);
 
 
@@ -172,9 +113,9 @@ namespace MLASERP
 
                 if (currentTile.X == end.X && currentTile.Y == end.Y)
                 {
-                    Console.WriteLine(currentTile.mirror_count);
+                    // Console.WriteLine(currentTile.mirror_count);
                     // PrintPath(currentTile);
-                    return;
+                    return currentTile;
                 }
 
                 if (visitedTiles.Contains(currentTile.getID()))
@@ -196,6 +137,80 @@ namespace MLASERP
                     };
 
 
+                }
+            }
+            return null;
+        }
+
+        static void Main(string[] args)
+        {
+            //God i love COWS with LAZERS
+            var paramLine = Console.ReadLine();
+
+            if (paramLine == null)
+            {
+                return;
+            }
+            string[] par = paramLine.Split(" ");
+
+            //Get the pasture dimensions
+            int w = int.Parse(par[0]);
+            int h = int.Parse(par[1]);
+
+            if (w <= 0 || h <= 0 || w > 100 || h > 100)
+            {
+                return;
+            }
+
+
+            string[] plot = new string[h];
+
+            int flag = 0;
+            PlotTile start = new PlotTile();
+            PlotTile end = new PlotTile();
+
+            //Get the plot
+            for (int i = 0; i < h; i++)
+            {
+                var plotline = Console.ReadLine();
+                if (plotline == null)
+                {
+                    return;
+                }
+                plot[i] = plotline;
+
+                //Find and set cow positions
+                for (int j = 0; j < plotline.Length; j++)
+                {
+                    char ch = plotline[j];
+                    if (ch == 'C' && flag != 2)
+                    {
+                        if (flag == 0)
+                        {
+                            start.X = j;
+                            start.Y = i;
+                            flag++;
+                        }
+                        else
+                        {
+                            end.X = j;
+                            end.Y = i;
+                            flag++;
+                        }
+                    }
+                }
+            }
+            var trace_one = performPathTrace(start, end, plot, w, h);
+            var trace_two = performPathTrace(end, start, plot, w, h);
+            if (trace_one != null && trace_two != null)
+            {
+                if (trace_one.mirror_count > trace_two.mirror_count)
+                {
+                    Console.WriteLine(trace_two.mirror_count);
+                }
+                else
+                {
+                    Console.WriteLine(trace_one.mirror_count);
                 }
             }
         }
