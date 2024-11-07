@@ -9,7 +9,19 @@ public class GraphConverter
         {
             string graphType = Console.ReadLine();
             int n = int.Parse(Console.ReadLine());
-            Dictionary<string, List<(string, int?)>> graph = new Dictionary<string, List<(string, int?)>>();
+
+            StringBuilder sb = new StringBuilder();
+            bool isGraph = graphType[0] == 'g';
+
+            if (isGraph)
+            {
+                sb.AppendLine("graph {");
+            }
+            else
+            {
+                sb.AppendLine("digraph {");
+            }
+
 
             for (int j = 0; j < n; j++)
             {
@@ -22,55 +34,25 @@ public class GraphConverter
                     weight = int.Parse(edge[2]);
                 }
 
-                if (!graph.ContainsKey(source))
-                {
-                    graph[source] = new List<(string, int?)>();
-                }
-                graph[source].Add((target, weight));
-            }
-
-            Console.WriteLine(ConvertToGraphviz(graphType, graph));
-        }
-    }
-
-    private static string ConvertToGraphviz(string graphType, Dictionary<string, List<(string, int?)>> graph)
-    {
-        StringBuilder sb = new StringBuilder();
-        bool isGraph = graphType == "g" || graphType == "gw";
-
-        if (isGraph)
-        {
-            sb.AppendLine("graph {");
-        }
-        else
-        {
-            sb.AppendLine("digraph {");
-        }
-
-        foreach (var node in graph)
-        {
-            foreach (var neighbor in node.Value)
-            {
-                string line;
                 if (isGraph)
                 {
-                    line = $"{node.Key} -- {neighbor.Item1}";
+                    sb.Append($"{source} -- {target}");
                 }
                 else
                 {
-                    line = $"{node.Key} -> {neighbor.Item1}";
+                    sb.Append($"{source} -> {target}");
                 }
 
-                if (graphType == "gw" || graphType == "dw")
+                if (weight != null)
                 {
-                    line += $" [label = {neighbor.Item2}]";
+                    sb.Append($" [label = {weight}]");
                 }
-                line += ";";
-                sb.AppendLine(line);
+                sb.AppendLine(";");
             }
-        }
 
-        sb.AppendLine("}");
-        return sb.ToString();
+
+            sb.AppendLine("}");
+            Console.WriteLine(sb.ToString());
+        }
     }
 }
